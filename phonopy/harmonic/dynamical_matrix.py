@@ -474,6 +474,8 @@ class DynamicalMatrixNAC(DynamicalMatrix):
 
         if q_norm < self._symprec:
             self._run(q)
+            self._short_range_dynamical_matrix=copy.deepcopy(self.dynamical_matrix)
+            self._long_range_dynamical_matrix=np.zeros_like(self.dynamical_matrix)
             return False
 
         self._compute_dynamical_matrix(q, q_direction)
