@@ -37,6 +37,7 @@
 import sys
 import warnings
 from typing import Type, Union
+import copy
 
 import numpy as np
 
@@ -223,6 +224,52 @@ class DynamicalMatrix:
             return dm
         else:
             return dm.round(decimals=self._decimals)
+
+    @property
+    def short_range_dynamical_matrix(self):
+        """Return short range dynamcial matrix calculated at q.
+
+        Returns
+        -------
+        ndarray
+            shape=(natom * 3, natom *3)
+            dtype=complex of "c%d" % (np.dtype('double').itemsize * 2)
+
+        """
+        dm = self._short_range_dynamical_matrix
+
+        if dm is None:
+            return None
+
+        if self._decimals is None:
+            return dm
+        else:
+            return dm.round(decimals=self._decimals)
+
+    @property
+    def long_range_dynamical_matrix(self):
+        """Return long range dynamcial matrix calculated at q.
+
+        Returns
+        -------
+        ndarray
+            shape=(natom * 3, natom *3)
+            dtype=complex of "c%d" % (np.dtype('double').itemsize * 2)
+
+        """
+        dm = self._long_range_dynamical_matrix
+
+        if dm is None:
+            return None
+
+        if self._decimals is None:
+            return dm
+        else:
+            return dm.round(decimals=self._decimals)
+
+
+
+
 
     def get_dynamical_matrix(self):
         """Return dynamcial matrix calculated at q."""
@@ -613,6 +660,9 @@ class DynamicalMatrixGL(DynamicalMatrixNAC):
         self._H = None
         self._bz = BrillouinZone(self._rec_lat)
 
+        self._short_range_dynamical_matrix=None
+        self._long_range_dynamical_matrix=None
+
         if nac_params is not None:
             self.nac_params = nac_params
 
@@ -758,6 +808,8 @@ class DynamicalMatrixGL(DynamicalMatrixNAC):
         self._run(q_red)
         self._force_constants = fc
         dm_dd = self._get_Gonze_dipole_dipole(q_red, q_direction)
+        self._short_range_dynamical_matrix=copy.deepcopy(self._dynamical_matrix)
+        self._long_range_dynamical_matrix=dm_dd
         self._dynamical_matrix += dm_dd
 
     def _get_Gonze_dipole_dipole(self, q_red, q_direction):
